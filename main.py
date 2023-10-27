@@ -1,4 +1,4 @@
-##credit goes to Lord-McSweeny for showing me how to use sin and cos for the ray calculations
+##credit goes to Batuhan Harmanci for showing me how to use sin and cos for the ray calculations
 ##rest of the code is mine
 
 import pygame, math, sys
@@ -77,6 +77,8 @@ def castSurface(ray):
   if ray.distance != None and ray.color != None and ray.distance != 0:
     pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
 
+def renderGround(x, y, width, height, color):
+  pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
    
 player = Player(200, 200)
 Block(350, 150, 400, 250, "red")
@@ -116,7 +118,7 @@ while True:
  
     for ray in range(math.ceil(60/resolution)):
         Ray((ray*resolution-30)+player.angle, player.vd, player.x, player.y, ray)
- 
+    renderGround(0, 200, 400, 200, (200, 100, 0))
     for ray in Ray.rayList:
         ray.cast()
         castSurface(ray)
