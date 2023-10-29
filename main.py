@@ -80,7 +80,7 @@ def castSurface(ray):
 def renderGround(x, y, width, height, color):
   pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
 
-def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245):
+def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245, orientation = "vertical"):
   if r > 245:
     r = 245
   if g > 245:
@@ -88,15 +88,21 @@ def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245):
   if b > 245:
     b = 245
   Block(x1, y1, width, height, (r, g, b))
-  Block(x1-1, y1, 1, height, (r+10, g+10, b+10))
-  Block(x1+width, y1, 1, height, (r+10, g+10, b+10))
+  if orientation == "vertical":
+    Block(x1-1, y1, 1, height, (r+10, g+10, b+10))
+    Block(x1+width, y1, 1, height, (r+10, g+10, b+10))
+  elif orientation == "horizontal":
+    Block(x1, y1-1, width, 1, (r+10, g+10, b+10))
+    Block(x1, y1+height, width, 1, (r+10, g+10, b+10))
+  else:
+    print("orientation not supported(try vertical/horizontal)")
   
 
 player = Player(200, 200)
 
 
 makeBlock(350, 150, 400, 250, 255, 0, 0)
-makeBlock(300, 100, 310, 110, 0, 255, 0)
+makeBlock(300, 100, 310, 110, 0, 255, 0, "horizontal")
 makeBlock(100, 0, 150, 150, 0, 0, 255)
 makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
