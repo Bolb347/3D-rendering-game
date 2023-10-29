@@ -1,4 +1,4 @@
-##credit goes to Batuhan Harmanci for showing me how to use sin and cos for the ray calculations
+##credit goes to Lord-McSweeny for explaining the trigonometric functions used in ray calculations based on angles
 ##rest of the code is mine
 
 import pygame, math, sys
@@ -79,15 +79,31 @@ def castSurface(ray):
 
 def renderGround(x, y, width, height, color):
   pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
-   
+
+def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245):
+  if r > 245:
+    r = 245
+  if g > 245:
+    g = 245
+  if b > 245:
+    b = 245
+  Block(x1, y1, width, height, (r, g, b))
+  Block(x1-1, y1, 1, height, (r+10, g+10, b+10))
+  Block(x1+width, y1, 1, height, (r+10, g+10, b+10))
+  
+
 player = Player(200, 200)
-Block(350, 150, 400, 250, "red")
-Block(300, 100, 310, 110, "green")
-Block(100, 0, 150, 150, "blue")
-Block(0, 0, 10, 400, "gray")
-Block(0, 0, 400, 10, "gray")
-Block(390, 0, 10, 400, "gray")
-Block(0, 390, 400, 10, "gray")
+
+
+makeBlock(350, 150, 400, 250, 255, 0, 0)
+makeBlock(300, 100, 310, 110, 0, 255, 0)
+makeBlock(100, 0, 150, 150, 0, 0, 255)
+makeBlock(0, 0, 10, 400)
+makeBlock(0, 0, 400, 10)
+makeBlock(390, 0, 10, 400)
+makeBlock(0, 390, 400, 10)
+
+
 while True:
     pygame.event.get()
     screen.fill("black")
