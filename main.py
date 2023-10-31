@@ -191,7 +191,7 @@ while running == True:
 
     if scene == "Game":
         for ray in pendingDrawings:
-            ray.surface = pygame.transform.scale(ray.surface, (1/ray.distance, 1))
+            ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
             screen.blit(ray.surface, (ray.idx*((400/60)*resolution), 200))
 
     if scene == "Map":
