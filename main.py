@@ -57,6 +57,7 @@ class Ray:
         Ray.rayList.append(self)
 
     def cast(self):
+        global defaultColor
         broken = False
         while broken == False:
             if self.length <= self.maxLength:
@@ -76,6 +77,7 @@ class Ray:
                         self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
                         self.surface = obj.surface
                         tempList.remove(obj)
+                        broken = True
             else:
                 broken = True
         Ray.rayList.remove(self)
@@ -87,6 +89,8 @@ class Obj:
         self.x = x
         self.y = y
         self.img = img
+        self.boxw = boxw
+        self.boxh = boxh
         self.hitbox = pygame.Rect(x-boxw/2, y-boxw/2, boxw, boxh)
         if img != None:
             self.surface = pygame.image.load(img)
@@ -95,11 +99,32 @@ class Obj:
 
     def draw(self):
         pygame.draw.circle(screen, "pink", (self.x, self.y), 5)
+        
+
+class Enemy(Obj):
+  enemyList = []
+  
+  def __init__(self, x, y, img, boxw, boxh, speed = 1, damage = 1):
+    super().__init__(x, y, img, boxw, boxh)
+    self.speed = speed
+    self.damage = damage
+    
+    Enemy.enemyList.append(self)
+  
+  def move(self):
+    self.hitbox = pygame.Rect(self.x-self.boxw/2, self.y-self.boxw/2, self.boxw, self.boxh)
+    self.x -= (self.x-player.x)/100
+    self.y -= (self.y-player.y)/100
+    for block in Block.blockList:
+            if block.hitbox.collidepoint(self.x, self.y):
+                self.x += (self.x-player.x)/100
+                self.y += (self.y-player.y)/100
+    
 
 
 def castSurface(ray):
-    if ray.distance != None and ray.distance != 0:
-        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
+    if ray.distance != None and ray.distance != 0 and ray.color != None:
+        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 13)
     if ray.distance != None and ray.distance != 0 and ray.surface != None:
         pendingDrawings.append(ray)
  
@@ -134,8 +159,7 @@ makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
 makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
-#Obj(200, 150, "square.png", 10, 10) #none is the image for loading like "blah.png" or "blah.gif"
-
+Enemy(200, 170, "obj.png", 10, 10) #need to change name to a jpg or gif in your directory
 
 while running == True:
     tempList = []
@@ -183,6 +207,8 @@ while running == True:
         ray.cast()
         if scene == "Game":
             castSurface(ray)
+    for enemy in Enemy.enemyList:
+        enemy.move()
     if scene == "Map":
         for block in Block.blockList:
             block.draw()
@@ -196,6 +222,6 @@ while running == True:
 
     if scene == "Map":
         player.draw()
-
+    
     pygame.display.update()
     clock.tick(60)
