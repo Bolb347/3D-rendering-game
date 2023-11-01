@@ -8,6 +8,8 @@ screen = pygame.display.set_mode((400, 400))
 resolution = 1
 moveSpeed = 2
 
+coins = 0
+
 font = pygame.font.SysFont("arial", 20)
 
 running = True
@@ -30,22 +32,31 @@ class Block:
         pygame.draw.rect(screen, self.color, self.hitbox)
 
 class Player:
-    def __init__(self, x, y, angle = 0, vd = 500, maxHealth = 10, hwidth = 10, hlength = 10):
+    def __init__(self, x, y, angle = 0, vd = 500, maxHealth = 200, maxArmor = 200, hwidth = 10, hlength = 10):
         self.x = x
         self.y = y
         self.angle = angle
         self.vd = vd
         self.maxHealth = maxHealth
-        self.health = maxHealth
+        self.health = 100
+        self.maxArmor = maxArmor
+        self.armor = 0
         self.hwidth = hwidth
         self.hlength = hlength
         self.hitbox = pygame.Rect(x-5, y-5, hwidth, hlength)
+        self.fireTimer = 0
+        self.fireSpeed = 10
 
     def draw(self):
         self.hitbox = pygame.Rect(self.x-5, self.y-5, self.hwidth, self.hlength)
         pygame.draw.circle(screen, "brown", (self.x, self.y), 5)
         pygame.draw.line(screen, "gray", (self.x, self.y), (self.x + math.cos(math.radians(self.angle))*10, self.y + math.sin(math.radians(self.angle))*10))
 
+    def fire(self):
+        self.fireTimer -= 1
+        if self.fireTimer <= 0:
+            Projectile(self.x, self.y, (math.cos(math.radians(self.angle)))*-5, (math.sin(math.radians(self.angle)))*-5, 2, "player")
+            self.fireTimer = self.fireSpeed
 
 class Ray:
     rayList = []
@@ -132,7 +143,7 @@ class Obj:
 class Enemy(Obj):
   enemyList = []
   
-  def __init__(self, x, y, img, boxw, boxh, damage = 1, speed = 1, ran = 50, fireSpeed = 50, health = 5):
+  def __init__(self, x, y, img, boxw, boxh, damage = 1, ran = 50, health = 5, fireSpeed = 200, speed = 0.5):
     super().__init__(x, y, img, boxw, boxh)
     self.damage = damage
     self.xspeed = 1
@@ -147,6 +158,7 @@ class Enemy(Obj):
     Enemy.enemyList.append(self)
   
   def move(self):
+    global coins
     self.distance = getDistance(self.x, self.y, player.x, player.y)
     if self.distance > self.ran:
         self.xspeed = ((self.x-player.x)/self.distance)*self.speed
@@ -158,11 +170,14 @@ class Enemy(Obj):
             if block.hitbox.collidepoint(self.x, self.y):
                 self.x += self.xspeed
                 self.y += self.yspeed
+    if self.health <= 0:
+        Enemy.enemyList.remove(self)
+        Obj.objList.remove(self)
+        coins += 1
   
   def fire(self):
-    self.fireTimer -= 1
     if self.fireTimer <= 0:
-      Projectile(self.x, self.y, self.xspeed*2, self.yspeed*2, self.damage, "enemy")
+      Projectile(self.x, self.y, self.xspeed*3, self.yspeed*3, self.damage, "enemy")
       self.fireTimer = self.fireSpeed
 
 
@@ -196,22 +211,24 @@ class Projectile:
       
     if self.types == "enemy":
       if player.hitbox.collidepoint(self.x, self.y):
-        player.health -= self.damage
+        for i in range(self.damage):
+            if player.armor > 0:
+              player.armor -= 1
+            else:
+                player.health -= 1
         Projectile.projectileList.remove(self)
-    elif self.types == "player":
-      for enemy in Enemy.enemyList:
-        if enemy.hitbox.collidepoint(self.x, self.y):
-          enemy.health -= self.damage
-          Projectile.projectileList.remove(self)
-          break
+    if self.types == "player":
+        for enemy in Enemy.enemyList:
+            if enemy.hitbox.collidepoint(self.x, self.y):
+                enemy.health -= self.damage
+                Projectile.projectileList.remove(self)
+                break
 
 def castSurface(ray):
     if ray.distance != None and ray.distance != 0 and ray.types == "regular":#and ray.color != None:
         pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
-    if ray.distance != None and ray.distance != 0 and ray.types == "object":#and ray.surface != None:
+    if ray.distance != None and ray.distance != 0 and ray.types == "object" or ray.types == "projectile":#and ray.surface != None:
         pendingDrawings.append(ray)
-    if ray.distance != None and ray.distance != 0 and ray.types == "projectile":
-        pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 200), 10)
 
 def renderGround(x, y, width, height, color):
     pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
@@ -237,7 +254,11 @@ def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245, orientation = "v
 def getDistance(x1, y1, x2, y2):
   return math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
 
-
+def makeWave(gunners, snipers, startx, starty):
+    for i in range(gunners):
+        enemy = Enemy(startx, starty, "square.png", 10, 10, 1, 20, 5, 50)
+    for i in range(snipers):
+        enemy = Enemy(startx, starty, "square.png", 10, 10, 10, 100, 1, 100)
 player = Player(200, 200)
 
 
@@ -248,7 +269,8 @@ makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
 makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
-Enemy(200, 170, "boy.png", 10, 10) #need to change name to a jpg or gif in your directory
+
+makeWave(5, 2, 250, 250)
 
 while running == True:
     tempList = []
@@ -287,6 +309,10 @@ while running == True:
                     scene = "Map"
                 elif scene == "Map":
                     scene = "Game"
+            player.fireTimer -= 1
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                player.fire()
+
     if keys[pygame.K_q]:
         pygame.quit()
         sys.exit()
@@ -315,8 +341,10 @@ while running == True:
         screen.blit(text, (120, 150))
         text = font.render("Space is to switch from game to map", True, "white")
         screen.blit(text, (120, 175))
-        text = font.render("Press 'T' to go back to title screen", True, "white")
+        text = font.render("Click to shoot", True, "white")
         screen.blit(text, (120, 200))
+        text = font.render("Press 'T' to go back to title screen", True, "white")
+        screen.blit(text, (120, 225))
 
         if keys[pygame.K_t]:
             scene = "Title"
@@ -342,8 +370,19 @@ while running == True:
 
     if scene == "Game":
         for ray in pendingDrawings:
-            ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
-            screen.blit(ray.surface, (ray.idx*((400/60)*resolution), 200))
+            if ray.types == "object":
+                ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
+                screen.blit(ray.surface, (ray.idx*((400/60)*resolution), 200))
+            if ray.types == "projectile":
+                pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 210), 90/ray.distance)
+        text = font.render("Coins: "+str(coins), True, "white")
+        screen.blit(text, (0, 0))
+        text = font.render("Enemies: "+str(len(Enemy.enemyList)), True, "white")
+        screen.blit(text, (300, 0))
+        text = font.render("Health: "+str(player.health), True, "white")
+        screen.blit(text, (0, 380))
+        text = font.render("Armor: "+str(player.armor), True, "white")
+        screen.blit(text, (300, 380))
 
     if scene == "Map":
         player.draw()
