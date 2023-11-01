@@ -67,7 +67,8 @@ class Ray:
                 if self.angle != 180:
                     self.y += self.mody
                 self.length += 1
-                #pygame.draw.circle(screen, "red", (self.x, self.y), 1)
+                if scene == "Map":
+                    pygame.draw.circle(screen, "gray", (self.x, self.y), 1)
                 for block in Block.blockList:
                     if block.hitbox.collidepoint(self.x, self.y):
                         self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
@@ -176,33 +177,34 @@ while running == True:
     screen.fill("black")
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_RIGHT]:
-        player.angle += 2
-    if keys[pygame.K_LEFT]:
-        player.angle -= 2
-    if keys[pygame.K_UP]:
-        player.x += math.cos(math.radians(player.angle))*moveSpeed
-        player.y += math.sin(math.radians(player.angle))*moveSpeed
-        for block in Block.blockList:
-            if block.hitbox.collidepoint(player.x, player.y):
-                player.x -= math.cos(math.radians(player.angle))*moveSpeed
-                player.y -= math.sin(math.radians(player.angle))*moveSpeed
-    if keys[pygame.K_DOWN]:
-        player.x -= math.cos(math.radians(player.angle))*moveSpeed
-        player.y -= math.sin(math.radians(player.angle))*moveSpeed
-        for block in Block.blockList:
-            if block.hitbox.collidepoint(player.x, player.y):
-                player.x += math.cos(math.radians(player.angle))*moveSpeed
-                player.y += math.sin(math.radians(player.angle))*moveSpeed
+    if scene == "Game" or scene == "Map":
+        if keys[pygame.K_RIGHT]:
+            player.angle += 2
+        if keys[pygame.K_LEFT]:
+            player.angle -= 2
+        if keys[pygame.K_UP]:
+            player.x += math.cos(math.radians(player.angle))*moveSpeed
+            player.y += math.sin(math.radians(player.angle))*moveSpeed
+            for block in Block.blockList:
+                if block.hitbox.collidepoint(player.x, player.y):
+                    player.x -= math.cos(math.radians(player.angle))*moveSpeed
+                    player.y -= math.sin(math.radians(player.angle))*moveSpeed
+        if keys[pygame.K_DOWN]:
+            player.x -= math.cos(math.radians(player.angle))*moveSpeed
+            player.y -= math.sin(math.radians(player.angle))*moveSpeed
+            for block in Block.blockList:
+                if block.hitbox.collidepoint(player.x, player.y):
+                    player.x += math.cos(math.radians(player.angle))*moveSpeed
+                    player.y += math.sin(math.radians(player.angle))*moveSpeed
+        for event in events:
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if scene == "Game":
+                    scene = "Map"
+                elif scene == "Map":
+                    scene = "Game"
     if keys[pygame.K_q]:
         pygame.quit()
         sys.exit()
-    for event in events:
-        if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            if scene == "Game":
-                scene = "Map"
-            elif scene == "Map":
-                scene = "Game"
 
 
     for ray in range(math.ceil(60/resolution)):
