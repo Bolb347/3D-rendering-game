@@ -2,6 +2,7 @@ import pygame, math, sys
 pygame.init()
 pygame.font.init()
 clock = pygame.time.Clock()
+lastColor = None
 
 screen = pygame.display.set_mode((400, 400))
 resolution = 1
@@ -57,6 +58,7 @@ class Ray:
         Ray.rayList.append(self)
 
     def cast(self):
+        global lastColor
         broken = False
         while broken == False:
             if self.length <= self.maxLength:
@@ -70,11 +72,16 @@ class Ray:
                     if block.hitbox.collidepoint(self.x, self.y):
                         self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
                         self.color = block.color
+                        lastColor = block.color
                         broken = True
                 for obj in tempList:
                     if obj.hitbox.collidepoint(self.x, self.y):
                         self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
                         self.surface = obj.surface
+                        ray1 = Ray(ray.angle, ray.maxLength, ray.x, ray.y, ray.idx)
+                        ray1.x = ray.x
+                        ray1.y = ray.y
+                        ray1.color = lastColor
                         tempList.remove(obj)
                         broken = True
             else:
@@ -123,7 +130,7 @@ class Enemy(Obj):
 
 def castSurface(ray):
     if ray.distance != None and ray.distance != 0 and ray.color != None:
-        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 14)
+        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
     if ray.distance != None and ray.distance != 0 and ray.surface != None:
         pendingDrawings.append(ray)
  
