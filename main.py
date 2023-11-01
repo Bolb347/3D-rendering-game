@@ -57,7 +57,6 @@ class Ray:
         Ray.rayList.append(self)
 
     def cast(self):
-        global defaultColor
         broken = False
         while broken == False:
             if self.length <= self.maxLength:
