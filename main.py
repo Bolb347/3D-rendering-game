@@ -62,6 +62,7 @@ class Ray:
         self.distance = None
         self.color = None
         self.surface = None
+        self.types = None
 
         Ray.rayList.append(self)
 
@@ -82,6 +83,7 @@ class Ray:
                         self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
                         self.color = block.color
                         lastColor = block.color
+                        self.types = "regular"
                         broken = True
                 for obj in tempList:
                     if obj.hitbox.collidepoint(self.x, self.y):
@@ -92,6 +94,7 @@ class Ray:
                         ray1.y = ray.y
                         ray1.color = lastColor
                         tempList.remove(obj)
+                        self.types = "object"
                         broken = True
                 for projectile in tempList2:
                     if projectile.hitbox.collidepoint(self.x, self.y):
@@ -100,7 +103,8 @@ class Ray:
                         ray1.x = ray.x
                         ray1.y = ray.y
                         ray1.color = lastColor
-                        tempList.remove(projectile)
+                        tempList2.remove(projectile)
+                        self.types = "projectile"
                         broken = True
             else:
                 broken = True
@@ -199,13 +203,16 @@ class Projectile:
         if enemy.hitbox.collidepoint(self.x, self.y):
           enemy.health -= self.damage
           Projectile.projectileList.remove(self)
+          break
 
 def castSurface(ray):
-    if ray.distance != None and ray.distance != 0 and ray.color != None:
+    if ray.distance != None and ray.distance != 0 and ray.types == "regular":#and ray.color != None:
         pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
-    if ray.distance != None and ray.distance != 0 and ray.surface != None:
+    if ray.distance != None and ray.distance != 0 and ray.types == "object":#and ray.surface != None:
         pendingDrawings.append(ray)
- 
+    if ray.distance != None and ray.distance != 0 and ray.types == "projectile":
+        pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 200), 10)
+
 def renderGround(x, y, width, height, color):
     pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
 
@@ -241,7 +248,7 @@ makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
 makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
-Enemy(200, 170, "square2.png", 10, 10) #need to change name to a jpg or gif in your directory
+Enemy(200, 170, "boy.png", 10, 10) #need to change name to a jpg or gif in your directory
 
 while running == True:
     tempList = []
