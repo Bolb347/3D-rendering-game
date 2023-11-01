@@ -8,8 +8,10 @@ screen = pygame.display.set_mode((400, 400))
 resolution = 1
 moveSpeed = 2
 
+font = pygame.font.SysFont("arial", 20)
+
 running = True
-scene = "Game"
+scene = "Title"
 
 class Block:
     blockList = []
@@ -91,6 +93,15 @@ class Ray:
                         ray1.color = lastColor
                         tempList.remove(obj)
                         broken = True
+                for projectile in tempList2:
+                    if projectile.hitbox.collidepoint(self.x, self.y):
+                        self.distance = math.sqrt((player.x-self.x)*(player.x-self.x)+(player.y-self.y)*(player.y-self.y))
+                        ray1 = Ray(ray.angle, ray.maxLength, ray.x, ray.y, ray.idx)
+                        ray1.x = ray.x
+                        ray1.y = ray.y
+                        ray1.color = lastColor
+                        tempList.remove(projectile)
+                        broken = True
             else:
                 broken = True
         Ray.rayList.remove(self)
@@ -120,8 +131,8 @@ class Enemy(Obj):
   def __init__(self, x, y, img, boxw, boxh, damage = 1, speed = 1, ran = 50, fireSpeed = 50, health = 5):
     super().__init__(x, y, img, boxw, boxh)
     self.damage = damage
-    self.xspeed = 0
-    self.yspeed = 0
+    self.xspeed = 1
+    self.yspeed = 1
     self.speed = speed
     self.distance = 0
     self.ran = ran
@@ -145,11 +156,11 @@ class Enemy(Obj):
                 self.y += self.yspeed
   
   def fire(self):
-    fireTimer -= 1
+    self.fireTimer -= 1
     if self.fireTimer <= 0:
-      self.fireTimer = self.fireSpeed
       Projectile(self.x, self.y, self.xspeed*2, self.yspeed*2, self.damage, "enemy")
-      
+      self.fireTimer = self.fireSpeed
+
 
 
 class Projectile:
@@ -162,14 +173,19 @@ class Projectile:
     self.yspeed = yspeed
     self.damage = damage
     self.types = types
+    self.hitbox = pygame.Rect(x, y, 5, 5)
     
-    projectileList.append(self)
+    Projectile.projectileList.append(self)
   
   def move(self):
-    self.x += self.xspeed
-    self.y += self.yspeed
+    self.x -= self.xspeed
+    self.y -= self.yspeed
+    self.hitbox = pygame.Rect(self.x, self.y, 5, 5)
+
+    if scene == "Map":
+        pygame.draw.circle(screen, "purple", (self.x, self.y), 2)
     
-    for block in blockList:
+    for block in Block.blockList:
       if block.hitbox.collidepoint(self.x, self.y):
         Projectile.projectileList.remove(self)
         break
@@ -183,7 +199,6 @@ class Projectile:
         if enemy.hitbox.collidepoint(self.x, self.y):
           enemy.health -= self.damage
           Projectile.projectileList.remove(self)
-
 
 def castSurface(ray):
     if ray.distance != None and ray.distance != 0 and ray.color != None:
@@ -226,12 +241,15 @@ makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
 makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
-Enemy(200, 170, "boy.png", 10, 10) #need to change name to a jpg or gif in your directory
+Enemy(200, 170, "square2.png", 10, 10) #need to change name to a jpg or gif in your directory
 
 while running == True:
     tempList = []
+    tempList2 = []
     for obj in Obj.objList:
         tempList.append(obj)
+    for projectile in Projectile.projectileList:
+        tempList2.append(projectile)
     pendingDrawings = []
     events = pygame.event.get()
     screen.fill("black")
@@ -266,6 +284,35 @@ while running == True:
         pygame.quit()
         sys.exit()
 
+    if scene == "Title":
+        text = font.render("Doom V0.01", True, "white")
+        screen.blit(text, (100, 100))
+        text = font.render("Press 'SPACE' to start", True, "white")
+        screen.blit(text, (120, 125))
+        text = font.render("Press 'H' for help", True, "white")
+        screen.blit(text, (120, 150))
+        text = font.render("Made by Bolb347", True, "white")
+        screen.blit(text, (0, 350))
+
+        if keys[pygame.K_SPACE]:
+            scene = "Game"
+        if keys[pygame.K_h]:
+            scene = "Help"
+
+    if scene == "Help":
+        text = font.render("Controls:", True, "white")
+        screen.blit(text, (100, 100))
+        text = font.render("Left Arrow/Right Arrow to turn", True, "white")
+        screen.blit(text, (120, 125))
+        text = font.render("Up Arrow/Down Arrow to move", True, "white")
+        screen.blit(text, (120, 150))
+        text = font.render("Space is to switch from game to map", True, "white")
+        screen.blit(text, (120, 175))
+        text = font.render("Press 'T' to go back to title screen", True, "white")
+        screen.blit(text, (120, 200))
+
+        if keys[pygame.K_t]:
+            scene = "Title"
 
     for ray in range(math.ceil(60/resolution)):
         Ray((ray*resolution-30)+player.angle, player.vd, player.x, player.y, ray)
@@ -277,6 +324,9 @@ while running == True:
             castSurface(ray)
     for enemy in Enemy.enemyList:
         enemy.move()
+        enemy.fire()
+    for projectile in Projectile.projectileList:
+        projectile.move()
     if scene == "Map":
         for block in Block.blockList:
             block.draw()
