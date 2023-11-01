@@ -28,13 +28,19 @@ class Block:
         pygame.draw.rect(screen, self.color, self.hitbox)
 
 class Player:
-    def __init__(self, x, y, angle = 0, vd = 500):
+    def __init__(self, x, y, angle = 0, vd = 500, maxHealth = 10, hwidth = 10, hlength = 10):
         self.x = x
         self.y = y
         self.angle = angle
         self.vd = vd
+        self.maxHealth = maxHealth
+        self.health = maxHealth
+        self.hwidth = hwidth
+        self.hlength = hlength
+        self.hitbox = pygame.Rect(x-5, y-5, hwidth, hlength)
 
     def draw(self):
+        self.hitbox = pygame.Rect(self.x-5, self.y-5, self.hwidth, self.hlength)
         pygame.draw.circle(screen, "brown", (self.x, self.y), 5)
         pygame.draw.line(screen, "gray", (self.x, self.y), (self.x + math.cos(math.radians(self.angle))*10, self.y + math.sin(math.radians(self.angle))*10))
 
@@ -111,22 +117,72 @@ class Obj:
 class Enemy(Obj):
   enemyList = []
   
-  def __init__(self, x, y, img, boxw, boxh, speed = 1, damage = 1):
+  def __init__(self, x, y, img, boxw, boxh, damage = 1, speed = 1, ran = 50, fireSpeed = 50, health = 5):
     super().__init__(x, y, img, boxw, boxh)
-    self.speed = speed
     self.damage = damage
+    self.xspeed = 0
+    self.yspeed = 0
+    self.speed = speed
+    self.distance = 0
+    self.ran = ran
+    self.fireSpeed = fireSpeed
+    self.fireTimer = fireSpeed
+    self.health = health
     
     Enemy.enemyList.append(self)
   
   def move(self):
-    self.hitbox = pygame.Rect(self.x-self.boxw/2, self.y-self.boxw/2, self.boxw, self.boxh)
-    self.x -= (self.x-player.x)/100
-    self.y -= (self.y-player.y)/100
-    for block in Block.blockList:
+    self.distance = getDistance(self.x, self.y, player.x, player.y)
+    if self.distance > self.ran:
+        self.xspeed = ((self.x-player.x)/self.distance)*self.speed
+        self.yspeed = ((self.y-player.y)/self.distance)*self.speed
+        self.hitbox = pygame.Rect(self.x-self.boxw/2, self.y-self.boxw/2, self.boxw, self.boxh)
+        self.x -= self.xspeed
+        self.y -= self.yspeed
+        for block in Block.blockList:
             if block.hitbox.collidepoint(self.x, self.y):
-                self.x += (self.x-player.x)/100
-                self.y += (self.y-player.y)/100
+                self.x += self.xspeed
+                self.y += self.yspeed
+  
+  def fire(self):
+    fireTimer -= 1
+    if self.fireTimer <= 0:
+      self.fireTimer = self.fireSpeed
+      Projectile(self.x, self.y, self.xspeed*2, self.yspeed*2, self.damage, "enemy")
+      
+
+
+class Projectile:
+  projectileList = []
+  
+  def __init__(self, x, y, xspeed, yspeed, damage, types):
+    self.x = x
+    self.y = y
+    self.xspeed = xspeed
+    self.yspeed = yspeed
+    self.damage = damage
+    self.types = types
     
+    projectileList.append(self)
+  
+  def move(self):
+    self.x += self.xspeed
+    self.y += self.yspeed
+    
+    for block in blockList:
+      if block.hitbox.collidepoint(self.x, self.y):
+        Projectile.projectileList.remove(self)
+        break
+      
+    if self.types == "enemy":
+      if player.hitbox.collidepoint(self.x, self.y):
+        player.health -= self.damage
+        Projectile.projectileList.remove(self)
+    elif self.types == "player":
+      for enemy in Enemy.enemyList:
+        if enemy.hitbox.collidepoint(self.x, self.y):
+          enemy.health -= self.damage
+          Projectile.projectileList.remove(self)
 
 
 def castSurface(ray):
@@ -139,22 +195,26 @@ def renderGround(x, y, width, height, color):
     pygame.draw.rect(screen, color, pygame.Rect(x, y, width, height))
 
 def makeBlock(x1, y1, width, height, r = 245, g = 245, b = 245, orientation = "vertical"):
-    if r > 245:
-        r = 245
-    if g > 245:
-        g = 245
-    if b > 245:
-        b = 245
+    if r > 235:
+        r = 235
+    if g > 235:
+        g = 235
+    if b > 235:
+        b = 235
     Block(x1, y1, width, height, (r, g, b))
     if orientation == "vertical":
-        Block(x1-1, y1, 1, height, (r+10, g+10, b+10))
-        Block(x1+width, y1, 1, height, (r+10, g+10, b+10))
+        Block(x1-1, y1, 1, height, (r+20, g+20, b+20))
+        Block(x1+width, y1, 1, height, (r+20, g+20, b+20))
     elif orientation == "horizontal":
-        Block(x1, y1-1, width, 1, (r+10, g+10, b+10))
-        Block(x1, y1+height, width, 1, (r+10, g+10, b+10))
+        Block(x1, y1-1, width, 1, (r+20, g+20, b+20))
+        Block(x1, y1+height, width, 1, (r+20, g+20, b+20))
     else:
         print("orientation not supported(try 'vertical'/'horizontal')")
  
+
+def getDistance(x1, y1, x2, y2):
+  return math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+
 
 player = Player(200, 200)
 
@@ -166,7 +226,7 @@ makeBlock(0, 0, 10, 400)
 makeBlock(0, 0, 400, 10)
 makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
-Enemy(200, 170, "obj.png", 10, 10) #need to change name to a jpg or gif in your directory
+Enemy(200, 170, "boy.png", 10, 10) #need to change name to a jpg or gif in your directory
 
 while running == True:
     tempList = []
