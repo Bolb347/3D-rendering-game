@@ -123,7 +123,7 @@ class Enemy(Obj):
 
 def castSurface(ray):
     if ray.distance != None and ray.distance != 0 and ray.color != None:
-        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 13)
+        pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 14)
     if ray.distance != None and ray.distance != 0 and ray.surface != None:
         pendingDrawings.append(ray)
  
