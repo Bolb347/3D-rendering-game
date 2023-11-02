@@ -325,7 +325,7 @@ while running == True:
         text = font.render("Press 'H' for help", True, "white")
         screen.blit(text, (120, 150))
         text = font.render("Made by Bolb347", True, "white")
-        screen.blit(text, (0, 350))
+        screen.blit(text, (0, 380))
 
         if keys[pygame.K_SPACE]:
             scene = "Game"
@@ -339,7 +339,7 @@ while running == True:
         screen.blit(text, (120, 125))
         text = font.render("Up Arrow/Down Arrow to move", True, "white")
         screen.blit(text, (120, 150))
-        text = font.render("Space is to switch from game to map", True, "white")
+        text = font.render("Space is to switch scene", True, "white")
         screen.blit(text, (120, 175))
         text = font.render("Click to shoot", True, "white")
         screen.blit(text, (120, 200))
