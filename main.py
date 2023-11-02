@@ -343,7 +343,7 @@ while running == True:
         screen.blit(text, (120, 175))
         text = font.render("Click to shoot", True, "white")
         screen.blit(text, (120, 200))
-        text = font.render("Press 'T' to go back to title screen", True, "white")
+        text = font.render("Press 'T' to go to title screen", True, "white")
         screen.blit(text, (120, 225))
 
         if keys[pygame.K_t]:
