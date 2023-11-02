@@ -372,7 +372,7 @@ while running == True:
         for ray in pendingDrawings:
             if ray.types == "object":
                 ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
-                screen.blit(ray.surface, (ray.idx*((400/60)*resolution), 200))
+                screen.blit(ray.surface, (ray.idx*((400/60)*resolution-10), 200))
             if ray.types == "projectile":
                 pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 210), 90/ray.distance)
         text = font.render("Coins: "+str(coins), True, "white")
