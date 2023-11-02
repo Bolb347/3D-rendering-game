@@ -256,11 +256,10 @@ def getDistance(x1, y1, x2, y2):
 
 def makeWave(gunners, snipers, startx, starty):
     for i in range(gunners):
-        enemy = Enemy(startx, starty, "boy.png", 10, 10, 1, 100, 2, 50)
+        enemy = Enemy(startx, starty, "boy.png", 10, 10, 1, 50, 2, 100)
     for i in range(snipers):
-        enemy = Enemy(startx, starty, "Rock.png", 10, 10, 10, 500, 1, 100)
+        enemy = Enemy(startx, starty, "Rock.png", 10, 10, 5, 100, 1, 500)
 player = Player(200, 200)
-
 
 makeBlock(350, 150, 400, 250, 255, 0, 0)
 makeBlock(300, 100, 310, 110, 0, 255, 0, "horizontal")
