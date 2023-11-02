@@ -55,7 +55,7 @@ class Player:
     def fire(self):
         self.fireTimer -= 1
         if self.fireTimer <= 0:
-            Projectile(self.x, self.y, (math.cos(math.radians(self.angle)))*-5, (math.sin(math.radians(self.angle)))*-5, 2, "player")
+            Projectile(self.x, self.y, (math.cos(math.radians(self.angle)))*-5, (math.sin(math.radians(self.angle)))*-5, 1, "player")
             self.fireTimer = self.fireSpeed
 
 class Ray:
@@ -225,9 +225,9 @@ class Projectile:
                 break
 
 def castSurface(ray):
-    if ray.distance != None and ray.distance != 0 and ray.types == "regular":#and ray.color != None:
+    if ray.distance != None and ray.distance != 0 and ray.types == "regular":
         pygame.draw.line(screen, ray.color, (ray.idx*((400/60)*resolution), 200-(5000/ray.distance)), (ray.idx*((400/60)*resolution), 200+(5000/ray.distance)), 7)
-    if ray.distance != None and ray.distance != 0 and ray.types == "object" or ray.types == "projectile":#and ray.surface != None:
+    if ray.distance != None and ray.distance != 0 and ray.types == "object" or ray.types == "projectile":
         pendingDrawings.append(ray)
 
 def renderGround(x, y, width, height, color):
@@ -256,9 +256,9 @@ def getDistance(x1, y1, x2, y2):
 
 def makeWave(gunners, snipers, startx, starty):
     for i in range(gunners):
-        enemy = Enemy(startx, starty, "square.png", 10, 10, 1, 20, 5, 50)
+        enemy = Enemy(startx, starty, "boy.png", 10, 10, 1, 100, 2, 50)
     for i in range(snipers):
-        enemy = Enemy(startx, starty, "square.png", 10, 10, 10, 100, 1, 100)
+        enemy = Enemy(startx, starty, "Rock.png", 10, 10, 10, 500, 1, 100)
 player = Player(200, 200)
 
 
@@ -313,7 +313,7 @@ while running == True:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 player.fire()
 
-    if keys[pygame.K_q]:
+    if keys[pygame.K_q] or player.health <= 0:
         pygame.quit()
         sys.exit()
 
@@ -358,6 +358,7 @@ while running == True:
         if scene == "Game":
             castSurface(ray)
     for enemy in Enemy.enemyList:
+        enemy.fireTimer -= 1
         enemy.move()
         enemy.fire()
     for projectile in Projectile.projectileList:
