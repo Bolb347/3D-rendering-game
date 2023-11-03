@@ -163,7 +163,7 @@ class Enemy(Obj):
     if self.distance > self.ran:
         self.xspeed = ((self.x-player.x)/self.distance)*self.speed
         self.yspeed = ((self.y-player.y)/self.distance)*self.speed
-        self.hitbox = pygame.Rect(self.x-self.boxw/2, self.y-self.boxw/2, self.boxw, self.boxh)
+        self.hitbox = pygame.Rect(self.x-self.boxw, self.y-self.boxh, self.boxw*2, self.boxh*2)
         self.x -= self.xspeed
         self.y -= self.yspeed
         for block in Block.blockList:
@@ -372,7 +372,7 @@ while running == True:
         for ray in pendingDrawings:
             if ray.types == "object":
                 ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
-                screen.blit(ray.surface, (ray.idx*((400/60)*resolution-10), 200))
+                screen.blit(ray.surface, (ray.idx*((400/60)*resolution)-10, 200))
             if ray.types == "projectile":
                 pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 210), 90/ray.distance)
         text = font.render("Coins: "+str(coins), True, "white")
