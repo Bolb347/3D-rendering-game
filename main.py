@@ -395,7 +395,7 @@ while running == True:
                     scene = "Map"
                 elif scene == "Map":
                     scene = "Game"
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.MOUSEBUTTONDOWN or event.type == pygame.KEYDOWN and event.key == pygame.K_f:
                 player.fire()
         
         for powerUp in PowerUp.powerUpList:
