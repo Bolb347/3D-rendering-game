@@ -297,6 +297,42 @@ def waves(difficulty = 1):
         if block.hitbox.collidepoint(x, y):
             Obj.objList = []
             Enemy.enemyList = []
+    
+    powerUps(random.randint(0, 2), random.randint(0, 2), random.randint(0, 2))
+
+def powerUps(health, shield, coins):
+    for i in range(health):
+        x = random.randint(10, 390)
+        y = random.randint(10, 390)
+        for block in Block.blockList:
+            if block.hitbox.collidepoint(x, y):
+                x = None
+                y = None
+        
+        if x != None and y != None:
+            PowerUp(x, y, "Rock.png", 10, 10, "Health")
+        
+    for i in range(shield):
+        x = random.randint(10, 390)
+        y = random.randint(10, 390)
+        for block in Block.blockList:
+            if block.hitbox.collidepoint(x, y):
+                x = None
+                y = None
+        
+        if x != None and y != None:
+            PowerUp(x, y, "Rock.png", 10, 10, "Armor")
+      
+    for i in range(coins):
+        x = random.randint(10, 390)
+        y = random.randint(10, 390)
+        for block in Block.blockList:
+            if block.hitbox.collidepoint(x, y):
+                x = None
+                y = None
+        
+        if x != None and y != None:
+            PowerUp(x, y, "Rock.png", 10, 10, "Coins")
 
 player = Player(200, 200)
 
@@ -309,8 +345,6 @@ makeBlock(390, 0, 10, 400)
 makeBlock(0, 390, 400, 10)
 
 waves()
-
-health = PowerUp(200, 300, "Rock.png", 10, 10, "Health")
 
 while running == True:
     if len(Enemy.enemyList) == 0:
