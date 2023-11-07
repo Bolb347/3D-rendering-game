@@ -4,11 +4,15 @@ pygame.font.init()
 clock = pygame.time.Clock()
 lastColor = None
 
+print("Warning: May give an error of 'list.remove(x), x not in list' - I have currently not found any way to fix that")
+
 screen = pygame.display.set_mode((400, 400))
 resolution = 1
 moveSpeed = 2
 
 coins = 0
+
+difficulty = 1
 
 font = pygame.font.SysFont("arial", 20)
 
@@ -169,9 +173,9 @@ class Enemy(Obj):
                 self.x += self.xspeed
                 self.y += self.yspeed
     if self.health <= 0:
+        coins += self.damage
         Enemy.enemyList.remove(self)
         Obj.objList.remove(self)
-        coins += 1
   
   def fire(self):
     if self.fireTimer <= 0:
@@ -196,14 +200,12 @@ class PowerUp(Obj):
         if self.hitbox.collidepoint(player.x, player.y):
             if self.types == "Health":
                 player.health += 10
-            elif self.types == "Coins":
+            if self.types == "Coins":
                 coins += 5
-            elif self.types == "Armor":
+            if self.types == "Armor":
                 player.armor += 10
-            else:
-                print("type not supported")
-            PowerUp.powerUpList.remove(self)
             Obj.objList.remove(self)
+            PowerUp.powerUpList.remove(self)
 
     def draw(self):
         pygame.draw.circle(screen, "purple", (self.x, self.y), 5)
@@ -308,9 +310,10 @@ def powerUps(health, shield, coins):
             if block.hitbox.collidepoint(x, y):
                 x = None
                 y = None
+                break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 10, 10, "Health")
+            PowerUp(x, y, "Rock.png", 40, 40, "Health")
         
     for i in range(shield):
         x = random.randint(10, 390)
@@ -319,9 +322,10 @@ def powerUps(health, shield, coins):
             if block.hitbox.collidepoint(x, y):
                 x = None
                 y = None
+                break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 10, 10, "Armor")
+            PowerUp(x, y, "Rock.png", 40, 40, "Armor")
       
     for i in range(coins):
         x = random.randint(10, 390)
@@ -330,9 +334,10 @@ def powerUps(health, shield, coins):
             if block.hitbox.collidepoint(x, y):
                 x = None
                 y = None
+                break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 10, 10, "Coins")
+            PowerUp(x, y, "Rock.png", 40, 40, "Coins")
 
 player = Player(200, 200)
 
@@ -348,7 +353,8 @@ waves()
 
 while running == True:
     if len(Enemy.enemyList) == 0:
-        waves()
+        waves(difficulty)
+        difficulty += 1
     tempList = []
     tempList2 = []
     for obj in Obj.objList:
@@ -358,6 +364,9 @@ while running == True:
     pendingDrawings = []
     events = pygame.event.get()
     screen.fill("black")
+    
+    if scene == "Game":
+        renderGround(0, 200, 400, 200, (200, 100, 0))
 
     keys = pygame.key.get_pressed()
     if scene == "Game" or scene == "Map":
@@ -450,7 +459,6 @@ while running == True:
             obj.draw()
 
     if scene == "Game":
-        renderGround(0, 200, 400, 200, (200, 100, 0))
         for ray in pendingDrawings:#draws all objects and projectiles
             if ray.types == "object":
                 ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
@@ -460,7 +468,7 @@ while running == True:
         text = font.render("Coins: "+str(coins), True, "white")
         screen.blit(text, (0, 0))
         text = font.render("Enemies: "+str(len(Enemy.enemyList)), True, "white")
-        screen.blit(text, (300, 0))
+        screen.blit(text, (275, 0))
         text = font.render("Health: "+str(player.health), True, "white")
         screen.blit(text, (0, 380))
         text = font.render("Armor: "+str(player.armor), True, "white")
