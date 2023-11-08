@@ -12,6 +12,8 @@ coins = 0
 
 difficulty = 1
 
+wave = 1
+
 font = pygame.font.SysFont("arial", 20)
 
 running = True
@@ -282,10 +284,10 @@ def getDistance(x1, y1, x2, y2):
   return math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
 
 def makeWave(gunners, snipers, startx, starty):#generates the wave
-    for i in range(gunners):
-        Enemy(startx, starty, "boy.png", 10, 10, 1, 50, 2, 100)
-    for i in range(snipers):
-        Enemy(startx, starty, "Star.png", 10, 10, 5, 100, 1, 500)
+    for i in range(math.floor(gunners)):
+        Enemy(startx, starty, "monster2.png", 10, 10, 1, 50, 2, 100)
+    for i in range(math.floor(snipers)):
+        Enemy(startx, starty, "monster.png", 10, 10, 5, 100, 1, 500)
 
 def waves(difficulty = 1):
     Obj.objList = []
@@ -311,7 +313,7 @@ def powerUps(health, shield, coins):
                 break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 40, 40, "Health")
+            PowerUp(x, y, "health.png", 40, 40, "Health")
         
     for i in range(shield):
         x = random.randint(10, 390)
@@ -323,7 +325,7 @@ def powerUps(health, shield, coins):
                 break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 40, 40, "Armor")
+            PowerUp(x, y, "shield.png", 40, 40, "Armor")
       
     for i in range(coins):
         x = random.randint(10, 390)
@@ -335,7 +337,7 @@ def powerUps(health, shield, coins):
                 break
         
         if x != None and y != None:
-            PowerUp(x, y, "Rock.png", 40, 40, "Coins")
+            PowerUp(x, y, "coin.png", 40, 40, "Coins")
 
 def removeFromList(lists, obj):
   for thing in lists:
@@ -358,7 +360,8 @@ waves()
 while running == True:
     if len(Enemy.enemyList) == 0:
         waves(difficulty)
-        difficulty += 1
+        difficulty += 0.5
+        wave += 1
     tempList = []
     tempList2 = []
     for obj in Obj.objList:
@@ -438,8 +441,12 @@ while running == True:
         screen.blit(text, (120, 200))
         text = font.render("Some enemies have more health", True, "white")
         screen.blit(text, (120, 225))
-        text = font.render("Press 'T' to go to title screen", True, "white")
+        text = font.render("Beat 10 waves to win!", True, "white")
         screen.blit(text, (120, 250))
+        text = font.render("Press 'T' to go to title screen", True, "white")
+        screen.blit(text, (120, 275))
+        text = font.render("Press 'Q' to exit", True, "white")
+        screen.blit(text, (120, 350))
 
         if keys[pygame.K_t]:
             scene = "Title"
@@ -477,10 +484,20 @@ while running == True:
         screen.blit(text, (0, 380))
         text = font.render("Armor: "+str(player.armor), True, "white")
         screen.blit(text, (300, 380))
+        text = font.render("Wave: "+str(wave), True, "white")
+        screen.blit(text, (150, 380))
         pygame.draw.rect(screen, "gray", pygame.Rect(190, 198, player.fireTimer*2, 4))
 
     if scene == "Map":
         player.draw()
+
+    if player.health <= 0:
+        scene = "Title"
+        print("You Lose!")
+
+    if difficulty >= 6:
+        scene = "Title"
+        print("You Win!")
 
     pygame.display.update()
     clock.tick(60)
