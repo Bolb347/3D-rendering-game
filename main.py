@@ -472,8 +472,9 @@ while running == True:
     if scene == "Game":
         for ray in pendingDrawings:#draws all objects and projectiles
             if ray.types == "object":
-                ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
-                screen.blit(ray.surface, (ray.idx*((400/60)*resolution)-10, 200))
+                if ray.distance >= 0:
+                    ray.surface = pygame.transform.scale(ray.surface, (5000/ray.distance, 5000/ray.distance))
+                    screen.blit(ray.surface, (ray.idx*((400/60)*resolution)-10, 200))
             if ray.types == "projectile":#scales black cicle for projectiles
                 pygame.draw.circle(screen, "black", (ray.idx*((400/60)*resolution), 210), 90/ray.distance)
         text = font.render("Coins: "+str(coins), True, "white")
@@ -492,10 +493,22 @@ while running == True:
         player.draw()
 
     if player.health <= 0:
+        player.health = 100
+        Obj.objList = []
+        enemy.enemyList = []
+        powerUp.powerUpList = []
+        coins = 0
+        wave = 0
         scene = "Title"
         print("You Lose!")
 
-    if difficulty >= 6:
+    if wave > 10:
+        player.health = 100
+        Obj.objList = []
+        enemy.enemyList = []
+        powerUp.powerUpList = []
+        coins = 0
+        wave = 0
         scene = "Title"
         print("You Win!")
 
