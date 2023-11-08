@@ -4,8 +4,6 @@ pygame.font.init()
 clock = pygame.time.Clock()
 lastColor = None
 
-print("Warning: May give an error of 'list.remove(x), x not in list' - I have currently not found any way to fix that")
-
 screen = pygame.display.set_mode((400, 400))
 resolution = 1
 moveSpeed = 2
@@ -107,7 +105,7 @@ class Ray:
                         ray1.x = ray.x
                         ray1.y = ray.y
                         ray1.color = lastColor
-                        tempList.remove(obj)
+                        removeFromList(tempList, obj)
                         self.types = "object"
                         broken = True
                 for projectile in tempList2:
@@ -117,12 +115,12 @@ class Ray:
                         ray1.x = ray.x
                         ray1.y = ray.y
                         ray1.color = lastColor
-                        tempList2.remove(projectile)
+                        removeFromList(tempList2, projectile)
                         self.types = "projectile"
                         broken = True
             else:
                 broken = True
-        Ray.rayList.remove(self)
+        removeFromList(Ray.rayList, self)
 
 class Obj:
     objList = []
@@ -174,8 +172,8 @@ class Enemy(Obj):
                 self.y += self.yspeed
     if self.health <= 0:
         coins += self.damage
-        Enemy.enemyList.remove(self)
-        Obj.objList.remove(self)
+        removeFromList(Enemy.enemyList, self)
+        removeFromList(Obj.objList, self)
   
   def fire(self):
     if self.fireTimer <= 0:
@@ -204,8 +202,8 @@ class PowerUp(Obj):
                 coins += 5
             if self.types == "Armor":
                 player.armor += 10
-            Obj.objList.remove(self)
-            PowerUp.powerUpList.remove(self)
+            removeFromList(Obj.objList, self)
+            removeFromList(PowerUp.powerUpList, self)
 
     def draw(self):
         pygame.draw.circle(screen, "purple", (self.x, self.y), 5)
@@ -235,7 +233,7 @@ class Projectile:
     
     for block in Block.blockList:
       if block.hitbox.collidepoint(self.x, self.y):
-        Projectile.projectileList.remove(self)
+        removeFromList(Projectile.projectileList, self)
         break
       
     if self.types == "enemy":
@@ -245,12 +243,12 @@ class Projectile:
               player.armor -= 1
             else:
                 player.health -= 1
-        Projectile.projectileList.remove(self)
+        removeFromList(Projectile.projectileList, self)
     if self.types == "player":
         for enemy in Enemy.enemyList:
             if enemy.hitbox.collidepoint(self.x, self.y):
                 enemy.health -= self.damage
-                Projectile.projectileList.remove(self)
+                removeFromList(Projectile.projectileList, self)
                 break
 
 def castSurface(ray):#draws the map and appends objects to pending drawings
@@ -338,6 +336,12 @@ def powerUps(health, shield, coins):
         
         if x != None and y != None:
             PowerUp(x, y, "Rock.png", 40, 40, "Coins")
+
+def removeFromList(lists, obj):
+  for thing in lists:
+    if obj == thing:
+      lists.remove(obj)
+      break
 
 player = Player(200, 200)
 
